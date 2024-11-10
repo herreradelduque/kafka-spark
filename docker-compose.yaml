@@ -29,17 +29,59 @@ services:
     volumes:
       - "kafka-volume:/bitnami"
 
+  kafka2:
+    image: docker.io/bitnami/kafka:3.3
+    restart: always
+    ports:
+      - "9094:9092"
+      - "9095:9093"
+    environment:
+      - KAFKA_BROKER_ID=2
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://0.0.0.0:9092,EXTERNAL://0.0.0.0:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka2:9092,EXTERNAL://localhost:9095
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
+    depends_on:
+      - zookeeper
+    volumes:
+      - "kafka2-volume:/bitnami"
+
+  kafka3:
+    image: docker.io/bitnami/kafka:3.3
+    restart: always
+    ports:
+      - "9096:9092"
+      - "9097:9093"
+    environment:
+      - KAFKA_BROKER_ID=3
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://0.0.0.0:9092,EXTERNAL://0.0.0.0:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka3:9092,EXTERNAL://localhost:9097
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
+    depends_on:
+      - zookeeper
+    volumes:
+      - "kafka3-volume:/bitnami"
+
   kafdrop:
     image: obsidiandynamics/kafdrop:latest
     restart: always
     ports:
       - "9000:9000"
     environment:
-      KAFKA_BROKERCONNECT: "kafka:9092"
+      KAFKA_BROKERCONNECT: "kafka:9092,kafka2:9092,kafka3:9092"
       JVM_OPTS: "-Xms32M -Xmx64M"
     depends_on:
       - kafka
+      - kafka2
+      - kafka3
 
 volumes:
   kafka-volume:
+  kafka2-volume:
+  kafka3-volume:
   zookeeper-volume:
